@@ -1,14 +1,12 @@
-#include <WiFi.h>
-#include <WebServer.h>
-#include <DNSServer.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
 
 // WiFi SoftAP credentials
 const char* ssid = "OpenLabG14";
 const char* password = "OpenLabGroup14";
 
-// Create web server on port 80 and a DNS server on port 53
-WebServer server(80);
-DNSServer dnsServer;
+// Create web server on port 80
+ESP8266WebServer server(80);
 
 // Global storage for sensor (measured) values
 // Indices: 0: Voltage1, 1: Current1, 2: Voltage2, 3: Current2, 4: Voltage3, 5: Current3
@@ -41,7 +39,7 @@ unsigned long lastPrintTime = millis();         // Used for printing UI state (a
 bool adminLoggedIn = false;
 
 //----------------------------------------------------------------------
-// Complete HTML page served by the ESP32 as a raw literal string.
+// Complete HTML page served by the ESP8266 as a raw literal string.
 const char* htmlPage = R"rawliteral(
 <!DOCTYPE html>
 <html>
@@ -447,7 +445,7 @@ const char* htmlPage = R"rawliteral(
       }
     }
 
-    // Disable control elements for all sources (view only mode)
+    // Disable control elements for all sources (view-only mode)
     function disableAllControls() {
       for (let i = 1; i <= 3; i++){
         disableControls(i);
@@ -789,14 +787,15 @@ void processSerialInput() {
 void setup() {
   Serial.begin(9600);
   delay(1000);
-  Serial.println("XIAO ESP32S3 starting...");
+  Serial.println("NodeMCU starting...");
 
-  WiFi.softAP(ssid, password);
+  // Set up WiFi Access Point with hidden SSID.
+  // Parameters: (ssid, password, channel, ssid_hidden)
+  WiFi.softAP(ssid, password, 1, true);
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
 
-  dnsServer.start(53, "*", myIP);
   server.on("/", handleRoot);
   server.on("/data", handleData);
   server.on("/update", handleUpdate);
@@ -808,7 +807,6 @@ void setup() {
 //----------------------------------------------------------------------
 // Main loop
 void loop() {
-  dnsServer.processNextRequest();
   server.handleClient();
 
   // Process incoming sensor data via Serial.
