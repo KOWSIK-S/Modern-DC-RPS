@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Modern DC RPS</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f7;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      /* Always visible since no login is used */
+      display: block;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    /* Power Source Styles */
+    .power-source {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+      position: relative;
+    }
+    .source-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      background-color: #e8f5e9;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    /* Special styling for Power Source 1 header */
+    #source1 .source-header {
+      background-color: #ffcc80;
+      border: 2px solid #ff9800;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .source-header h2 {
+      margin: 0;
+    }
+    .source-header label {
+      font-weight: normal;
+      margin-bottom: 0;
+    }
+    .readings {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .control-group {
+      margin: 10px 15px;
+      text-align: left;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .control-group h3 {
+      margin: 10px 0 5px;
+      font-size: 16px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+      font-weight: bold;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+    }
+    input[type="range"] {
+      width: 200px;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      display: none;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #66bb6a;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .mode-select {
+      width: 180px;
+      padding: 5px;
+    }
+    .label-span {
+      margin-left: 8px;
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Interface Container (no login overlay) -->
+  <div class="container" id="mainContainer">
+    <h1>Modern DC RPS</h1>
+
+    <!-- Power Source 1 -->
+    <div class="power-source" id="source1">
+      <div class="source-header">
+        <h2>Power Source 1</h2>
+        <label class="toggle-switch">
+          <!-- 0 = Voltmeter, 1 = RPS Mode -->
+          <input type="checkbox" id="sourceType1" onchange="updateSourceType(1)">
+          <span class="slider"></span>
+        </label>
+        <label id="sourceTypeLabel1" class="label-span">Voltmeter</label>
+      </div>
+      <div class="readings">
+        Voltage: <span id="voltage1">0.00</span> V<br>
+        Current: <span id="current1">0.00</span> A
+      </div>
+      <div class="control-group" id="controlGroup1">
+        <h3>Voltage Setpoint</h3>
+        <label>Adjust Voltage (Slider):</label>
+        <input type="range" min="0" max="48" value="24" id="voltageDial1" onchange="updateVoltageDial(1)">
+        <span id="voltageDialValue1">24</span><br>
+        <label>Voltage (Numeric):</label>
+        <input type="number" min="0" max="48" value="24" id="voltageNum1" onchange="updateVoltageNum(1)">
+      </div>
+      <div class="control-group" id="controlGroup1b">
+        <h3>Current Setpoint</h3>
+        <label>Adjust Current (Slider):</label>
+        <input type="range" min="0" max="5" value="2.5" id="currentDial1" onchange="updateCurrentDial(1)">
+        <span id="currentDialValue1">2.5</span><br>
+        <label>Current (Numeric):</label>
+        <input type="number" min="0" max="5" value="2.5" id="currentNum1" onchange="updateCurrentNum(1)">
+      </div>
+      <div class="control-group" id="controlGroup1c">
+        <label>Grounding:</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="groundToggle1" onchange="updateGround(1)">
+          <span class="slider"></span>
+        </label>
+        <span id="groundLabel1">Commonly Grounded</span>
+      </div>
+      <div class="control-group" id="controlGroup1d">
+        <label for="modeSelect1">Mode:</label>
+        <select id="modeSelect1" class="mode-select" onchange="updateMode(1)">
+          <option value="voltage">Voltage Control</option>
+          <option value="current">Current Control</option>
+          <option value="power">Power Control</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Power Source 2 -->
+    <div class="power-source" id="source2">
+      <div class="source-header">
+        <h2>Power Source 2</h2>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sourceType2" onchange="updateSourceType(2)">
+          <span class="slider"></span>
+        </label>
+        <label id="sourceTypeLabel2" class="label-span">Voltmeter</label>
+      </div>
+      <div class="readings">
+        Voltage: <span id="voltage2">0.00</span> V<br>
+        Current: <span id="current2">0.00</span> A
+      </div>
+      <div class="control-group" id="controlGroup2">
+        <h3>Voltage Setpoint</h3>
+        <label>Adjust Voltage (Slider):</label>
+        <input type="range" min="0" max="48" value="24" id="voltageDial2" onchange="updateVoltageDial(2)">
+        <span id="voltageDialValue2">24</span><br>
+        <label>Voltage (Numeric):</label>
+        <input type="number" min="0" max="48" value="24" id="voltageNum2" onchange="updateVoltageNum(2)">
+      </div>
+      <div class="control-group" id="controlGroup2b">
+        <h3>Current Setpoint</h3>
+        <label>Adjust Current (Slider):</label>
+        <input type="range" min="0" max="5" value="2.5" id="currentDial2" onchange="updateCurrentDial(2)">
+        <span id="currentDialValue2">2.5</span><br>
+        <label>Current (Numeric):</label>
+        <input type="number" min="0" max="5" value="2.5" id="currentNum2" onchange="updateCurrentNum(2)">
+      </div>
+      <div class="control-group" id="controlGroup2c">
+        <label>Grounding:</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="groundToggle2" onchange="updateGround(2)">
+          <span class="slider"></span>
+        </label>
+        <span id="groundLabel2">Commonly Grounded</span>
+      </div>
+      <div class="control-group" id="controlGroup2d">
+        <label for="modeSelect2">Mode:</label>
+        <select id="modeSelect2" class="mode-select" onchange="updateMode(2)">
+          <option value="voltage">Voltage Control</option>
+          <option value="current">Current Control</option>
+          <option value="power">Power Control</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Power Source 3 -->
+    <div class="power-source" id="source3">
+      <div class="source-header">
+        <h2>Power Source 3</h2>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sourceType3" onchange="updateSourceType(3)">
+          <span class="slider"></span>
+        </label>
+        <label id="sourceTypeLabel3" class="label-span">Voltmeter</label>
+      </div>
+      <div class="readings">
+        Voltage: <span id="voltage3">0.00</span> V<br>
+        Current: <span id="current3">0.00</span> A
+      </div>
+      <div class="control-group" id="controlGroup3">
+        <h3>Voltage Setpoint</h3>
+        <label>Adjust Voltage (Slider):</label>
+        <input type="range" min="0" max="48" value="24" id="voltageDial3" onchange="updateVoltageDial(3)">
+        <span id="voltageDialValue3">24</span><br>
+        <label>Voltage (Numeric):</label>
+        <input type="number" min="0" max="48" value="24" id="voltageNum3" onchange="updateVoltageNum(3)">
+      </div>
+      <div class="control-group" id="controlGroup3b">
+        <h3>Current Setpoint</h3>
+        <label>Adjust Current (Slider):</label>
+        <input type="range" min="0" max="5" value="2.5" id="currentDial3" onchange="updateCurrentDial(3)">
+        <span id="currentDialValue3">2.5</span><br>
+        <label>Current (Numeric):</label>
+        <input type="number" min="0" max="5" value="2.5" id="currentNum3" onchange="updateCurrentNum(3)">
+      </div>
+      <div class="control-group" id="controlGroup3c">
+        <label>Grounding:</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="groundToggle3" onchange="updateGround(3)">
+          <span class="slider"></span>
+        </label>
+        <span id="groundLabel3">Commonly Grounded</span>
+      </div>
+      <div class="control-group" id="controlGroup3d">
+        <label for="modeSelect3">Mode:</label>
+        <select id="modeSelect3" class="mode-select" onchange="updateMode(3)">
+          <option value="voltage">Voltage Control</option>
+          <option value="current">Current Control</option>
+          <option value="power">Power Control</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global UI state for each source. Default: Voltmeter mode (0)
+    let sources = {
+      1: { sourceType: 0, ground: 0, mode: "voltage", voltageSet: 24, currentSet: 2.5 },
+      2: { sourceType: 0, ground: 0, mode: "voltage", voltageSet: 24, currentSet: 2.5 },
+      3: { sourceType: 0, ground: 0, mode: "voltage", voltageSet: 24, currentSet: 2.5 }
+    };
+
+    // In this demo version, sendUpdate simply logs the update.
+    function sendUpdate(source, param, value) {
+      console.log("Update from Source " + source + ": " + param + " = " + value);
+      // Replace with AJAX calls if needed.
+    }
+
+    // Toggle source type: RPS (1) or Voltmeter (0)
+    function updateSourceType(source) {
+      let toggle = document.getElementById("sourceType" + source);
+      let label = document.getElementById("sourceTypeLabel" + source);
+      if (toggle.checked) {
+        sources[source].sourceType = 1;
+        label.textContent = "RPS Mode";
+        enableControls(source);
+      } else {
+        sources[source].sourceType = 0;
+        label.textContent = "Voltmeter";
+        disableControls(source);
+      }
+      sendUpdate(source, "sourceType", sources[source].sourceType);
+    }
+
+    // Voltage setpoint updates
+    function updateVoltageDial(source) {
+      let dial = document.getElementById("voltageDial" + source);
+      let numInput = document.getElementById("voltageNum" + source);
+      let dialValue = document.getElementById("voltageDialValue" + source);
+      let value = parseFloat(dial.value);
+      dialValue.innerHTML = value;
+      numInput.value = value;
+      sources[source].voltageSet = value;
+      sendUpdate(source, "voltage", value);
+    }
+    function updateVoltageNum(source) {
+      let numInput = document.getElementById("voltageNum" + source);
+      let dial = document.getElementById("voltageDial" + source);
+      let dialValue = document.getElementById("voltageDialValue" + source);
+      let value = parseFloat(numInput.value);
+      if (value > 48) { value = 48; numInput.value = value; }
+      if (value < 0) { value = 0; numInput.value = value; }
+      dialValue.innerHTML = value;
+      dial.value = value;
+      sources[source].voltageSet = value;
+      sendUpdate(source, "voltage", value);
+    }
+
+    // Current setpoint updates
+    function updateCurrentDial(source) {
+      let dial = document.getElementById("currentDial" + source);
+      let numInput = document.getElementById("currentNum" + source);
+      let dialValue = document.getElementById("currentDialValue" + source);
+      let value = parseFloat(dial.value);
+      dialValue.innerHTML = value;
+      numInput.value = value;
+      sources[source].currentSet = value;
+      sendUpdate(source, "current", value);
+    }
+    function updateCurrentNum(source) {
+      let numInput = document.getElementById("currentNum" + source);
+      let dial = document.getElementById("currentDial" + source);
+      let dialValue = document.getElementById("currentDialValue" + source);
+      let value = parseFloat(numInput.value);
+      if (value > 5) { value = 5; numInput.value = value; }
+      if (value < 0) { value = 0; numInput.value = value; }
+      dialValue.innerHTML = value;
+      dial.value = value;
+      sources[source].currentSet = value;
+      sendUpdate(source, "current", value);
+    }
+
+    // Ground toggle update
+    function updateGround(source) {
+      let groundToggle = document.getElementById("groundToggle" + source);
+      let groundLabel = document.getElementById("groundLabel" + source);
+      sources[source].ground = groundToggle.checked ? 1 : 0;
+      groundLabel.textContent = groundToggle.checked ? "Commonly Grounded" : "Not Commonly Grounded";
+      sendUpdate(source, "ground", sources[source].ground);
+    }
+
+    // Mode select update
+    function updateMode(source) {
+      let modeSelect = document.getElementById("modeSelect" + source);
+      sources[source].mode = modeSelect.value;
+      sendUpdate(source, "mode", modeSelect.value);
+    }
+
+    // Enable or disable controls based on the source type.
+    function enableControls(source) {
+      document.getElementById("voltageDial" + source).disabled = false;
+      document.getElementById("voltageNum" + source).disabled = false;
+      document.getElementById("currentDial" + source).disabled = false;
+      document.getElementById("currentNum" + source).disabled = false;
+    }
+    function disableControls(source) {
+      document.getElementById("voltageDial" + source).disabled = true;
+      document.getElementById("voltageNum" + source).disabled = true;
+      document.getElementById("currentDial" + source).disabled = true;
+      document.getElementById("currentNum" + source).disabled = true;
+      // Reset setpoints to 0 when disabled
+      document.getElementById("voltageDial" + source).value = 0;
+      document.getElementById("voltageDialValue" + source).innerHTML = "0";
+      document.getElementById("voltageNum" + source).value = 0;
+      document.getElementById("currentDial" + source).value = 0;
+      document.getElementById("currentDialValue" + source).innerHTML = "0";
+      document.getElementById("currentNum" + source).value = 0;
+      sources[source].voltageSet = 0;
+      sources[source].currentSet = 0;
+    }
+  </script>
+</body>
+</html>
